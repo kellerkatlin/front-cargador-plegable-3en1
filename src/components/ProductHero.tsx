@@ -570,7 +570,7 @@ export const ProductHero = () => {
                   "Carga simultánea de 3 dispositivos",
                   "Compatible con iPhone, Android, Apple Watch y AirPods",
                   "Diseño ultra compacto y portátil",
-                  "Tecnología de carga rápida 45W",
+                  "Tecnología de carga rápida 15W",
                   "Garantía de 12 meses incluida",
                 ].map((feature) => (
                   <div

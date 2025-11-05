@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Smartphone,
   Watch,
-  Headphones,
   Package,
   Award,
   ChevronRight,
