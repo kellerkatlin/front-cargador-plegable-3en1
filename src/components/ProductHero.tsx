@@ -35,6 +35,11 @@ const productImages = {
 // Imágenes adicionales que NO son variantes de color
 const additionalImages = [
   {
+    src: compatibilidadImage,
+    alt: "Compatibilidad universal",
+    type: "image" as const,
+  },
+  {
     src: cargaSeguraImage,
     alt: "Carga Segura - Protección inteligente",
     type: "image" as const,
@@ -43,11 +48,6 @@ const additionalImages = [
     src: videoSrc,
     alt: "Video demostración del producto",
     type: "video" as const,
-  },
-  {
-    src: compatibilidadImage,
-    alt: "Compatibilidad universal",
-    type: "image" as const,
   },
 ];
 
@@ -546,7 +546,7 @@ export const ProductHero = () => {
                   variant="outline"
                   className="text-xs sm:text-sm bg-amber-300 mt-3"
                 >
-                  🎁 Descuento extra al comprar 2 o más productos
+                  🎁 Descuento extra al comprar 2 o más unidades
                 </Badge>
               </div>
 
