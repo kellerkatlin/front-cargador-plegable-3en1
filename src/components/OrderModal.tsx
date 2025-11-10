@@ -20,8 +20,8 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
   const formatDate = (dateString: string) => {
     // El formato que viene del backend es: 2025-11-05 23:25:47.881608
     // Lo convertimos a ISO format para que Date lo interprete correctamente
-    const isoDate = dateString.replace(' ', 'T') + 'Z'; // Agregamos Z para indicar UTC
-    
+    const isoDate = dateString.replace(" ", "T") + "Z"; // Agregamos Z para indicar UTC
+
     return new Date(isoDate).toLocaleDateString("es-PE", {
       year: "numeric",
       month: "long",
@@ -161,7 +161,7 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
           {order.customers && (
             <div className="bg-muted/30 rounded-lg p-6 space-y-4">
               <h3 className="text-lg font-semibold">Información del Cliente</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Nombre Completo
@@ -176,6 +176,14 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
                   </p>
                   <p className="text-base">{order.customers.numero}</p>
                 </div>
+                {order.customers.dni !== "" && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      DNI
+                    </p>
+                    <p className="text-base">{order.customers.dni}</p>
+                  </div>
+                )}
               </div>
 
               <div>

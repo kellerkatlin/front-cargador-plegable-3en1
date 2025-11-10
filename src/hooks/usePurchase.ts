@@ -11,6 +11,7 @@ interface PurchasePayload {
     precio_unitario: number;
   }[];
   productId?: string;
+  envio_provincia?: boolean;
 }
 
 interface PurchaseResponse {
@@ -35,7 +36,7 @@ export const usePurchase = () => {
     setLoading(true);
     setError(null);
 
-    const { customer, items, productId } = payload;
+    const { customer, items, productId, envio_provincia } = payload;
 
     try {
       // ✅ 1. Validar stock disponible antes de procesar la compra
@@ -97,7 +98,9 @@ export const usePurchase = () => {
           total,
           estado_pago: "pendiente",
           estado_envio: "pendiente",
+          store_id: "0b22b271-7011-47b2-8dc6-0269784ccb38",
           customer_id: customerData.id, // si en tu schema la FK es customer_id
+          envio_provincia: envio_provincia ?? false, // Indica si es envío a provincia
         })
         .select()
         .single();
@@ -110,6 +113,7 @@ export const usePurchase = () => {
         color: item.color,
         cantidad: item.cantidad,
         precio_unitario: item.precio_unitario,
+        product_id: productId || null,
       }));
 
       const { error: orderItemsError } = await supabase

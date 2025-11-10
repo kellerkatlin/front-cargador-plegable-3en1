@@ -77,6 +77,7 @@ const formSchema = z.object({
   referencia: z.string().optional(),
   dni: z.string().optional(), // DNI es opcional, validación condicional en submit
   cantidad: z.number().min(1),
+  envio_provincia: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -500,6 +501,7 @@ export const PurchaseModal = ({
             : item.unitPrice,
         })),
         productId: product?.id, // Pasar el product ID para validar y decrementar stock
+        envio_provincia: shouldShowDNI ? true : false, // true si requiere DNI (provincia), false si es Lima/Callao
       },
       {
         onSuccess: ({ order, customer, order_items }) => {
@@ -689,7 +691,9 @@ export const PurchaseModal = ({
                   Número de Orden
                 </p>
                 <p className="text-4xl font-bold text-primary font-mono">
-                  #{successData.order?.id || "N/A"}
+                  #
+                  {successData.order?.id?.substring(0, 8).toUpperCase() ||
+                    "N/A"}
                 </p>
                 <div className="mt-4 pt-4 border-t border-primary/20 space-y-2">
                   <div className="flex justify-between text-sm">
@@ -716,7 +720,7 @@ export const PurchaseModal = ({
                 <a
                   href={`https://wa.me/51932567344?text=${encodeURIComponent(
                     `Hola! Tengo una consulta sobre mi pedido #${
-                      successData.order?.id || ""
+                      successData.order?.id?.substring(0, 8).toUpperCase() || ""
                     }`
                   )}`}
                   target="_blank"
