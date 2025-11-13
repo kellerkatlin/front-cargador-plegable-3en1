@@ -17,6 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
+  Star,
+  ShoppingBag,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { ColorSelector } from "./ColorSelector";
@@ -26,6 +28,8 @@ import { PurchaseModal } from "./PurchaseModal";
 import type { CartItem } from "@/types/cart";
 import { useProduct } from "@/hooks/useProduct";
 import type { ProductVariant } from "@/types/product";
+import { averageRating, totalReviews } from "@/data/testimonials";
+import { toast } from "sonner";
 
 const productImages = {
   White: blancoImage,
@@ -62,6 +66,23 @@ const colorNameMap: Record<ColorKey, string> = {
   Black: "Negro",
   Silvery: "Plateado",
 };
+
+// Notificaciones de compras simuladas
+const recentPurchases = [
+  { name: "Carlos R****", location: "Jesús María", time: "hace 15 minutos" },
+  { name: "María G*****", location: "Arequipa", time: "hace 1 hora" },
+  { name: "José L***", location: "Callao", time: "hace 2 horas" },
+  { name: "Ana S******", location: "Cusco", time: "hace 3 horas" },
+  { name: "Luis M******", location: "Trujillo", time: "hace 5 horas" },
+  { name: "Carmen P****", location: "Chiclayo", time: "hace 8 horas" },
+  { name: "Roberto F*****", location: "Piura", time: "hace 12 horas" },
+  { name: "Diana V****", location: "Iquitos", time: "hace 1 día" },
+  { name: "Fernando C*****", location: "Huancayo", time: "hace 2 días" },
+  { name: "Patricia R****", location: "Tacna", time: "hace 3 días" },
+  { name: "Miguel A*****", location: "Puno", time: "hace 5 días" },
+  { name: "Gabriela T****", location: "Ayacucho", time: "hace 1 semana" },
+  { name: "Jorge S****", location: "Miraflores", time: "hace 5 horas" },
+];
 
 export const ProductHero = () => {
   const [selectedColor, setSelectedColor] = useState<ColorKey>("Silvery");
@@ -259,6 +280,45 @@ export const ProductHero = () => {
   const openPurchaseModal = () => {
     setIsModalOpen(true);
   };
+
+  // Mostrar notificaciones de compras recientes aleatorias
+  useEffect(() => {
+    const showRandomPurchaseNotification = () => {
+      const randomPurchase =
+        recentPurchases[Math.floor(Math.random() * recentPurchases.length)];
+
+      toast(
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+            <ShoppingBag className="w-4 h-4 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-sm">
+              {randomPurchase.name} acaba de comprar
+            </p>
+            <p className="text-xs text-black/50">
+              {randomPurchase.location} • {randomPurchase.time}
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    // Mostrar primera notificación después de 5 segundos
+    const firstTimeout = setTimeout(() => {
+      showRandomPurchaseNotification();
+    }, 5000);
+
+    // Luego mostrar notificaciones cada 15-25 segundos (aleatorio)
+    const intervalId = setInterval(() => {
+      showRandomPurchaseNotification();
+    }, Math.random() * 10000 + 15000); // Entre 15 y 25 segundos
+
+    return () => {
+      clearTimeout(firstTimeout);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   // Para el scroll de miniaturas
   const thumbnailsRef = useRef<HTMLDivElement>(null);
@@ -475,7 +535,7 @@ export const ProductHero = () => {
   return (
     <>
       {/* Product Section */}
-      <section id="producto" className="py-6 mt-12 sm:py-12">
+      <section id="producto" className="py-6 mt-5 sm:py-12">
         <div className="w-full max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-start">
             {/* Product Image */}
@@ -485,11 +545,11 @@ export const ProductHero = () => {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="relative flex justify-center min-w-0"
             >
-              <div className="lg:sticky lg:top-24 space-y-3 sm:space-y-4 w-full min-w-0">
+              <div className="lg:sticky lg:top-24 space-y-0 sm:space-y-4 w-full min-w-0">
                 {" "}
                 {/* Main Image */}
                 <div
-                  className="relative rounded-2xl p-2 sm:p-8 flex items-center justify-center group w-full max-w-full mx-auto overflow-hidden"
+                  className="relative rounded-2xl p-0 sm:p-8 flex items-center justify-center group w-full max-w-full mx-auto overflow-hidden"
                   onTouchStart={onMainTouchStart}
                   onTouchMove={onMainTouchMove}
                   onTouchEnd={onMainTouchEnd}
@@ -645,58 +705,109 @@ export const ProductHero = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-              className="space-y-4 sm:space-y-6 w-full max-w-md mx-auto"
+              className="w-full max-w-md mx-auto px-2 space-y-4 sm:space-y-7"
             >
-              <div>
-                <h1 className="text-center md:text-left text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">
+              {/* Título + rating */}
+              <div className="text-left">
+                <h1 className="text-[1.8rem] -mt-4 sm:mt-0 sm:text-4xl md:text-5xl font-bold leading-tight">
                   Cargador inalámbrico plegable 3 en 1
                 </h1>
-                <p className="text-center md:text-left text-base sm:text-xl text-muted-foreground">
-                  Despídete del caos de cables – bienvenido al orden magnético
-                </p>
+
+                {/* Estrellas de calificación (accesible) */}
+                <div
+                  className="flex items-center gap-2 mt-2"
+                  aria-label={`Calificación ${averageRating} de 5`}
+                >
+                  <div className="flex gap-0.5" role="img">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">
+                    {averageRating}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({totalReviews})
+                  </span>
+                  {/* Sello social extra en mobile */}
+                  <span className="ml-2 hidden xs:inline text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5">
+                    +{Math.max(50, Math.min(9999, totalReviews))} vendidos
+                  </span>
+                </div>
               </div>
 
-              {/* Price */}
-              <div className="border-t border-b py-3 sm:py-4">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  {quantity >= 2 && (
+              {/* Precio + ofertas */}
+              <section className="rounded-2xl  bg-gray-50 border border-gray-200 p-4 sm:p-5 space-y-3">
+                <div className="flex  items-center gap-2 sm:gap-3 flex-wrap">
+                  {quantity >= 1 && (
                     <span className="text-muted-foreground line-through text-lg sm:text-2xl">
                       S/.{(originalPricePerUnit * quantity).toFixed(2)}
                     </span>
                   )}
-                  {quantity === 1 && (
-                    <span className="text-muted-foreground line-through text-lg sm:text-2xl">
-                      S/.{originalPricePerUnit.toFixed(2)}
-                    </span>
-                  )}
-                  <span className="text-3xl sm:text-4xl font-bold text-primary">
+                  <span className="text-3xl sm:text-5xl font-extrabold text-primary">
                     S/.{totalPrice.toFixed(2)}
                   </span>
-                  <Badge variant="destructive" className="text-xs sm:text-sm">
+                  <Badge
+                    variant="destructive"
+                    className="text-xs -mt-3 sm:text-sm"
+                  >
                     {quantity >= 2 ? "60% OFF" : "50% OFF"}
                   </Badge>
                 </div>
+
                 {quantity >= 2 && (
-                  <p className="text-sm sm:text-base text-green-600 font-semibold mt-2">
-                    ¡S/.{pricePerUnit2Plus.toFixed(2)} por unidad! Ahorras S/.
+                  <p className="text-sm sm:text-base text-green-700 font-semibold">
+                    S/.{pricePerUnit2Plus.toFixed(2)} por unidad · Ahorras S/.
                     {((pricePerUnit1 - pricePerUnit2Plus) * quantity).toFixed(
                       2
                     )}
                   </p>
                 )}
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2 animate-pulse">
-                  Envío gratis incluido
-                </p>
-                <Badge
-                  variant="outline"
-                  className="text-xs sm:text-sm bg-amber-300 mt-3"
-                >
-                  🎁 Descuento extra al comprar 2 o más unidades
-                </Badge>
-              </div>
 
-              {/* Color Selection */}
-              <div>
+                {/* Envío Gratis (gatillo principal) */}
+                <div
+                  className="rounded-xl p-[2px] bg-gradient-to-r from-emerald-500 to-green-600"
+                  aria-live="polite"
+                >
+                  <div className="relative rounded-[10px] py-1 px-1 text-center text-white shadow-sm overflow-hidden">
+                    {/* brillo diagonal muy sutil */}
+                    <span className="pointer-events-none absolute -left-10 top-0 h-full w-10 rotate-12 bg-white/20 blur-md" />
+                    <div
+                      onClick={openPurchaseModal}
+                      className="relative z-10 flex items-center justify-center gap-2"
+                    >
+                      <Truck className="w-5 h-5" />
+                      <span className="font-semibold text-sm sm:text-xs tracking-wide">
+                        🎉 ENVÍO GRATIS A TODO EL PERÚ
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Incentivo 2+ unidades */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    onClick={() => {
+                      if (quantity < 2) {
+                        setQuantity(2);
+                      }
+                    }}
+                    className="text-xs sm:text-sm bg-amber-300 hover:bg-amber-400 border-none font-medium px-1 py-2 cursor-pointer transition-all duration-200 active:scale-95"
+                  >
+                    🎁 Descuento extra al comprar 2 o más unidades
+                  </Badge>
+                  <span className="text-[11px] sm:text-xs text-gray-500">
+                    Oferta por tiempo limitado
+                  </span>
+                </div>
+              </section>
+
+              {/* Selector de color (FUNCIONAL, intacto) */}
+              <section>
                 <ColorSelector
                   selectedColor={selectedColor}
                   onColorChange={handleColorChange}
@@ -705,10 +816,10 @@ export const ProductHero = () => {
                     getColorStock(color as ColorKey)
                   }
                 />
-              </div>
+              </section>
 
-              {/* Quantity */}
-              <div className="space-y-2">
+              {/* Cantidad (FUNCIONAL, intacto) */}
+              <section className="space-y-2">
                 <p className="text-sm font-semibold">Cantidad</p>
                 <div className="flex items-center gap-3">
                   <Button
@@ -716,6 +827,7 @@ export const ProductHero = () => {
                     size="icon"
                     onClick={() => handleQuantityChange(-1)}
                     disabled={quantity <= 1}
+                    aria-label="Disminuir cantidad"
                   >
                     <MinusCircle className="w-5 h-5" />
                   </Button>
@@ -727,6 +839,7 @@ export const ProductHero = () => {
                     size="icon"
                     onClick={() => handleQuantityChange(1)}
                     disabled={quantity >= Math.min(totalAvailableStock, 10)}
+                    aria-label="Aumentar cantidad"
                   >
                     <PlusCircle className="w-5 h-5" />
                   </Button>
@@ -734,11 +847,11 @@ export const ProductHero = () => {
                 {totalAvailableStock === 0 && (
                   <p className="text-xs text-red-600 font-semibold">Agotado</p>
                 )}
-              </div>
+              </section>
 
-              {/* Order Items Summary - Solo aparece cuando quantity > 1 */}
+              {/* Resumen de pedido (FUNCIONAL, intacto) */}
               {quantity > 1 && (
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <section className="border border-gray-200 rounded-xl p-3 bg-gray-50">
                   <h3 className="text-sm font-semibold mb-2 text-gray-700">
                     Colores seleccionados
                   </h3>
@@ -774,44 +887,39 @@ export const ProductHero = () => {
                       </span>
                     </div>
                   </div>
-                </div>
+                </section>
               )}
 
-              {/* CTA Button */}
-              <div className="space-y-3">
-                <Button
-                  ref={inlineCtaRef}
-                  size="lg"
-                  className="w-full text-base sm:text-lg py-5 sm:py-6"
-                  onClick={openPurchaseModal}
-                >
-                  Ordenar Ahora - Pago Contraentrega
-                </Button>
+              {/* CTA principal */}
+              <Button
+                ref={inlineCtaRef}
+                size="icon"
+                className="w-full px- text-base sm:text-lg py-5 sm:py-6 rounded-2xl shadow-md hover:shadow-lg"
+                onClick={openPurchaseModal}
+              >
+                🚚 Pide ahora • paga en casa
+              </Button>
+
+              {/* Sellos de confianza */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
+                {[
+                  { icon: Truck, label: "Envío Gratis" },
+                  { icon: Shield, label: "Garantía 12 meses" },
+                  { icon: CreditCard, label: "Paga al Recibir" },
+                ].map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-muted/50 rounded-xl"
+                  >
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    <p className="text-[10px] sm:text-xs font-medium text-center leading-tight">
+                      {label}
+                    </p>
+                  </div>
+                ))}
               </div>
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 sm:pt-4">
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
-                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  <p className="text-[10px] sm:text-xs font-medium text-center leading-tight">
-                    Envío Gratis
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
-                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  <p className="text-[10px] sm:text-xs font-medium text-center leading-tight">
-                    Garantía 12 meses
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
-                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  <p className="text-[10px] sm:text-xs font-medium text-center leading-tight">
-                    Paga al Recibir
-                  </p>
-                </div>
-              </div>
-
-              {/* Features List */}
+              {/* Lista de características */}
               <div className="space-y-2.5 sm:space-y-3 pt-3 sm:pt-4 border-t">
                 {[
                   "Carga simultánea de 3 dispositivos",
@@ -824,13 +932,15 @@ export const ProductHero = () => {
                     key={feature}
                     className="flex items-start gap-2.5 sm:gap-3"
                   >
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary mt-0.5 flex-shrink-0" />
                     <span className="text-xs sm:text-sm leading-relaxed">
                       {feature}
                     </span>
                   </div>
                 ))}
               </div>
+
+              {/* Barra sticky de compra (solo mobile) */}
             </motion.div>
           </div>
         </div>
